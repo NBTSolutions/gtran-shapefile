@@ -4,7 +4,12 @@ var shp = require('shp-write');
 var fs = require('fs');
 var async = require('async');
 
-exports.fromGeoJson = function(geojson, fileName, callback) {
+exports.fromGeoJson = function(geojson, fileName, options, callback) {
+
+    var esriWKT;
+    if (options) {
+      esriWKT = options.esriWKT;
+    }
 
     var geoms = [];
     var properties = [];
@@ -45,16 +50,29 @@ exports.fromGeoJson = function(geojson, fileName, callback) {
             fileNameWithoutExt = fileNameWithoutExt.replace('.shp', '');
         }
 
-        async.parallel([
+        var tasks = [
             fs.writeFile(fileNameWithoutExt + '.shp', toBuffer(files.shp.buffer)),
             fs.writeFile(fileNameWithoutExt + '.shx', toBuffer(files.shx.buffer)),
             fs.writeFile(fileNameWithoutExt + '.dbf', toBuffer(files.dbf.buffer))
-        ], function(err) {
-            callback(err, [
-                fileNameWithoutExt + '.shp',
-                fileNameWithoutExt + '.shx',
-                fileNameWithoutExt + '.dbf'
-            ]);
+        ];
+
+        if (esriWKT) {
+          tasks.writeFile(fileNameWithoutExt + '.prj', esriWKT);
+        }
+
+        async.parallel(tasks, function(err) {
+
+           var fileNames = [
+               fileNameWithoutExt + '.shp',
+               fileNameWithoutExt + '.shx',
+               fileNameWithoutExt + '.dbf'
+           ];
+
+           if (esriWKT) {
+             fileNames.push(fileNameWithoutExt + '.prj');
+           }
+
+            callback(err, fileNames);
         });
     });
 }
