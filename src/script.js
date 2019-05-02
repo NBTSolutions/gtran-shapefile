@@ -16,6 +16,11 @@ exports.toGeoJson = function(fileName, options) {
 exports.fromGeoJson = function(geojson, fileName, attrCols, options) {
     if (!Promise) { setPromiseLib(); }
 
+    if (typeof options === 'undefined' && typeof attrCols === 'object') {
+        options = attrCols;
+        attrCols = null;
+    }
+
     var esriWKT;
     if (options) {
         esriWKT = options.esriWKT;
