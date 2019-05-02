@@ -13,7 +13,7 @@ exports.toGeoJson = function(fileName, options) {
     return shapefile.read(fileName);
 };
 
-exports.fromGeoJson = function(geojson, fileName, options) {
+exports.fromGeoJson = function(geojson, fileName, attrCols, options) {
     if (!Promise) { setPromiseLib(); }
 
     var esriWKT;
@@ -55,7 +55,7 @@ exports.fromGeoJson = function(geojson, fileName, options) {
                     reject(new Error('Given geometry type is not supported'));
             }
 
-            writeShp(properties, geomType, geoms, function(err, files) {
+            writeShp(properties, geomType, geoms, attrCols, function(err, files) {
                 if (err) {
                     reject(ex);
                 } else {
